@@ -9,11 +9,13 @@
 
 #define CRC5_MASK 0x1F
 
+static const u_int64_t BM1366_ASIC_COUNT = CONFIG_ASIC_COUNT;
 static const u_int64_t BM1366_FREQUENCY = CONFIG_ASIC_FREQUENCY;
-static const u_int64_t BM1366_CORE_COUNT = 672;
-static const u_int64_t BM1366_HASHRATE_S = BM1366_FREQUENCY * BM1366_CORE_COUNT * 1000000;
+static const u_int64_t BM1366_CORE_COUNT = 894;
+static const u_int64_t BM1366_HASHRATE_S = BM1366_ASIC_COUNT * BM1366_FREQUENCY * BM1366_CORE_COUNT * 1000000;
 //2^32
 //static const u_int64_t NONCE_SPACE = 4294967296;
+//static const double  BM1366_FULLSCAN_MS = ((double)NONCE_SPACE / (double)BM1366_HASHRATE_S) * 1000;
 static const double  BM1366_FULLSCAN_MS = 2140;
 
 typedef struct {

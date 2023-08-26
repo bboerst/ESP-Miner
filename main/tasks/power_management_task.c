@@ -34,7 +34,7 @@ static float _fbound(float value, float lower_bound, float upper_bound)
 
 // void _power_init(PowerManagementModule * power_management){
 //     power_management->frequency_multiplier = 1;
-//     power_management->frequency_value = ASIC_FREQUENCY;
+//     power_management->frequency_value = CONFIG_ASIC_FREQUENCY;
 
 // }
 
@@ -82,7 +82,7 @@ void POWER_MANAGEMENT_task(void * pvParameters){
             power_management->frequency_multiplier = lowest_multiplier;
 
 
-            float target_frequency = _fbound(power_management->frequency_multiplier * ASIC_FREQUENCY, 0, ASIC_FREQUENCY);
+            float target_frequency = _fbound(power_management->frequency_multiplier * CONFIG_ASIC_FREQUENCY, 0, CONFIG_ASIC_FREQUENCY);
 
             if(target_frequency < 50){
                 // TODO: Turn the chip off
@@ -103,7 +103,7 @@ void POWER_MANAGEMENT_task(void * pvParameters){
             }else{
                 if(
                     last_frequency_increase > 120 &&
-                    power_management->frequency_value != ASIC_FREQUENCY
+                    power_management->frequency_value != CONFIG_ASIC_FREQUENCY
                 ){
                     float add = (target_frequency + power_management->frequency_value) / 2;
                     power_management->frequency_value += _fbound(add, 2 , 20);

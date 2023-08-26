@@ -22,7 +22,7 @@
 static const char *TAG = "SystemModule";
 
 #define ASIC_VOLTAGE CONFIG_ASIC_VOLTAGE
-#define DOMAIN_COUNT CONFIG_BM1397_DOMAIN_COUNT
+#define VOLTAGE_DOMAIN_COUNT CONFIG_VOLTAGE_DOMAIN_COUNT
 
 static void _suffix_string(uint64_t, char *, size_t, int);
 
@@ -67,7 +67,7 @@ static void _init_system(SystemModule* module) {
     ADC_init();
 
     //DS4432U tests
-    DS4432U_set_vcore(DOMAIN_COUNT * ASIC_VOLTAGE / 1000.0);
+    DS4432U_set_vcore(VOLTAGE_DOMAIN_COUNT * ASIC_VOLTAGE / 1000.0);
 
     //Fan Tests
     EMC2101_init();

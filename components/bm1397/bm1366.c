@@ -255,8 +255,11 @@ _send_simple(init5, 11);
 unsigned char init6[7] = { 0x55, 0xAA, 0x53, 0x05, 0x00, 0x00, 0x03 };
 _send_simple(init6, 7);
 
-unsigned char init7[7] = { 0x55, 0xAA, 0x40, 0x05, 0x00, 0x00, 0x1C };
-_send_simple(init7, 7);
+for (int i = 0; i < BM1366_ASIC_COUNT; i++) {
+    _set_chip_address(i*(256/BM1366_ASIC_COUNT));
+    // unsigned char init7[7] = { 0x55, 0xAA, 0x40, 0x05, 0x00, 0x00, 0x1C };
+    // _send_simple(init7, 7);
+}
 
 
 unsigned char init135[11] = { 0x55, 0xAA, 0x51, 0x09, 0x00, 0x3C, 0x80, 0x00, 0x85, 0x40, 0x0C };
@@ -550,7 +553,7 @@ static void _send_read_address(void) {
 void BM1366_init(u_int64_t frequency) {
     ESP_LOGI(TAG, "Initializing BM1366");
 
-    memset(asic_response_buffer, 0, 1024);
+    memset(asic_response_buffer, 0, sizeof(asic_response_buffer));
 
     esp_rom_gpio_pad_select_gpio(BM1366_RST_PIN);
     gpio_set_direction(BM1366_RST_PIN, GPIO_MODE_OUTPUT);
