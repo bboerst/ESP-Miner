@@ -14,11 +14,11 @@ menu "Bitaxe Configuration"
             The core voltage to set the ASIC to. 1200 for BM1366 or 1400 for BM1397 is typical.
 
     config BM1397_DOMAIN_COUNT
-    int "Voltage Domain count"
-    range 3
-    default 1
-    help
-        The voltage domains count
+        int "Voltage Domain count"
+        range 1 3
+        default 1
+        help
+            The voltage domains count
 
     config ASIC_FREQUENCY
         int "ASIC Hash Frequency (MHz)"
@@ -29,10 +29,11 @@ menu "Bitaxe Configuration"
 
     config BM1397_ASIC_COUNT
         int "ASIC count in the chain"
-        range 6
+        range 1 6
         default 1
         help
             The BM1397 count the the chain
+
 endmenu
 
 menu "Stratum Configuration"
