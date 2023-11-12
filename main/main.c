@@ -86,9 +86,10 @@ void app_main(void)
         strncpy(GLOBAL_STATE.SYSTEM_MODULE.wifi_status, "Failed to connect", 20);
         // User might be trying to configure with AP, just chill here
         ESP_LOGI(TAG, "Finished, waiting for user input.");
-        while (1) {
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
-        }
+// bypass this for now for testing
+//        while (1) {
+//            vTaskDelay(1000 / portTICK_PERIOD_MS);
+//        }
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
         strncpy(GLOBAL_STATE.SYSTEM_MODULE.wifi_status, "unexpected error", 20);
@@ -106,6 +107,7 @@ void app_main(void)
     GLOBAL_STATE.SYSTEM_MODULE.startup_done = true;
 
     xTaskCreate(USER_INPUT_task, "user input", 8192, (void *) &GLOBAL_STATE, 5, NULL);
+    ESP_LOGI(TAG, "Starting power management task");
     xTaskCreate(POWER_MANAGEMENT_task, "power mangement", 8192, (void *) &GLOBAL_STATE, 10, NULL);
 
     if (GLOBAL_STATE.ASIC_functions.init_fn != NULL) {

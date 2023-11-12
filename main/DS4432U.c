@@ -118,6 +118,7 @@ void DS4432U_read(void)
 static void DS4432U_set(uint8_t val)
 {
     ESP_LOGI(TAG, "Writing 0x%02X", val);
+	vTaskDelay(500 / portTICK_PERIOD_MS);
     ESP_ERROR_CHECK(register_write_byte(DS4432U_OUT0_REG, val));
 }
 
