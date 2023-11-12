@@ -75,7 +75,7 @@ static void _init_system(GlobalState * global_state, SystemModule * module)
 
     // DS4432U tests
     //DS4432U_set_vcore(nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE) / 1000.0);
-    DS4432U_set_vcore(2000 / 1000.0);
+    DS4432U_set_vcore(1000 / 1000.0);
 
     // Fan Tests
     EMC2302_init(nvs_config_get_u16(NVS_CONFIG_INVERT_FAN_POLARITY, 1));
