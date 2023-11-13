@@ -1,6 +1,7 @@
 #include "DS4432U.h"
 #include "EMC2302.h"
 #include "INA219.h"
+#include "TMP1075.h"
 #include "bm1397.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -45,6 +46,7 @@ void POWER_MANAGEMENT_task(void * pvParameters)
     int last_frequency_increase = 0;
 
     bool read_power = INA219_installed();
+    bool read_temp = TMP1075_installed(0) && TMP1075_installed(1);
 
     uint16_t frequency_target = nvs_config_get_u16(NVS_CONFIG_ASIC_FREQ, CONFIG_ASIC_FREQUENCY);
 
@@ -57,11 +59,13 @@ void POWER_MANAGEMENT_task(void * pvParameters)
             power_management->power = INA219_read_power() / 1000;
             power_management->current = INA219_read_current();
         }
-        power_management->fan_speed = EMC2302_get_fan_speed();
+        power_management->fan_speed = EMC2302_get_fan_speed(0);
+        EMC2302_get_fan_speed(1);
+
+        power_management->chip_temp = TMP1075_read_temperature(0);
+        TMP1075_read_temperature(1);
 
         if (strcmp(GLOBAL_STATE->asic_model, "BM1397") == 0) {
-
-            power_management->chip_temp = EMC2302_get_external_temp();
 
             // Voltage
             // We'll throttle between 4.9v and 3.5v
@@ -117,7 +121,6 @@ void POWER_MANAGEMENT_task(void * pvParameters)
                 }
             }
         } else if (strcmp(GLOBAL_STATE->asic_model, "BM1366") == 0) {
-            power_management->chip_temp = EMC2302_get_internal_temp() + 5;
 
             if (power_management->chip_temp > THROTTLE_TEMP &&
                 (power_management->frequency_value > 50 || power_management->voltage > 1000)) {
@@ -128,8 +131,8 @@ void POWER_MANAGEMENT_task(void * pvParameters)
             }
         }
 
-        // ESP_LOGI(TAG, "target %f, Freq %f, Volt %f, Power %f", target_frequency, power_management->frequency_value,
-        // power_management->voltage, power_management->power);
+        //  ESP_LOGI(TAG, "target %f, Freq %f, Volt %f, Power %f", target_frequency, power_management->frequency_value,
+        //  power_management->voltage, power_management->power);
         vTaskDelay(POLL_RATE / portTICK_PERIOD_MS);
     }
 }

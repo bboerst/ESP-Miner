@@ -48,56 +48,42 @@ void EMC2302_init(bool invertPolarity)
 }
 
 // Sets the fan speed to a given percent
-void EMC2302_set_fan_speed(float percent)
+void EMC2302_set_fan_speed(uint8_t devicenum, float percent)
 {
     uint8_t speed;
+	uint8_t FAN_SETTING_REG = EMC2302_FAN1_SETTING + (devicenum * 0x10);
 
     speed = (uint8_t) (63.0 * percent);
-    ESP_ERROR_CHECK(register_write_byte(EMC2302_FAN1_SETTING, speed));
-    ESP_ERROR_CHECK(register_write_byte(EMC2302_FAN2_SETTING, speed));
+    ESP_ERROR_CHECK(register_write_byte(FAN_SETTING_REG, speed));
 }
 
 // Gets the fan speed
-uint16_t EMC2302_get_fan_speed(void)
+uint16_t EMC2302_get_fan_speed(uint8_t devicenum)
 {
     uint8_t tach_lsb, tach_msb;
     uint16_t RPM;
+    uint8_t TACH_LSB_REG = EMC2302_TACH1_LSB + (devicenum * 0x10);
+    uint8_t TACH_MSB_REG = EMC2302_TACH1_MSB + (devicenum * 0x10);
 
-    ESP_ERROR_CHECK(register_read(EMC2302_TACH1_LSB, &tach_lsb, 1));
-    ESP_ERROR_CHECK(register_read(EMC2302_TACH1_MSB, &tach_msb, 1));
+    ESP_ERROR_CHECK(register_read(TACH_LSB_REG, &tach_lsb, 1));
+    ESP_ERROR_CHECK(register_read(TACH_MSB_REG, &tach_msb, 1));
 
-    ESP_LOGI(TAG, "Raw Fan Speed = %02X %02X", tach_msb, tach_lsb);
+    ESP_LOGI(TAG, "Raw Fan Speed[%d] = %02X %02X", devicenum, tach_msb, tach_lsb);
+    RPM = (tach_msb << 5) + ((tach_lsb >> 3) & 0x1F);
+    ESP_LOGI(TAG, "Fan Speed[%d] = %d RPM", devicenum, RPM);
 
-    RPM = tach_lsb | (tach_msb << 8);
-
-    ESP_LOGI(TAG, "Fan Speed = %d RPM", RPM);
     return RPM;
 }
 
 float EMC2302_get_external_temp(void)
 {
     // We don't have temperature on this chip, so fake it
-    return 35;
-
-    //uint8_t temp_msb, temp_lsb;
-    //uint16_t reading;
-
-    //ESP_ERROR_CHECK(register_read(EMC2101_EXTERNAL_TEMP_MSB, &temp_msb, 1));
-    //ESP_ERROR_CHECK(register_read(EMC2101_EXTERNAL_TEMP_LSB, &temp_lsb, 1));
-
-    //reading = temp_lsb | (temp_msb << 8);
-    //reading >>= 5;
-
-    //return (float) reading / 8.0;
+    return 0;
 }
 
 uint8_t EMC2302_get_internal_temp(void)
 {
     // We don't have temperature on this chip, so fake it
-    return 30;
-
-    //uint8_t temp;
-    //ESP_ERROR_CHECK(register_read(EMC2101_INTERNAL_TEMP, &temp, 1));
-    //return temp;
+    return 0;
 }
 

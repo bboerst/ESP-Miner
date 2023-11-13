@@ -80,7 +80,8 @@ static void _init_system(GlobalState * global_state, SystemModule * module)
     // Fan Tests
     EMC2302_init(nvs_config_get_u16(NVS_CONFIG_INVERT_FAN_POLARITY, 1));
 
-    EMC2302_set_fan_speed((float) nvs_config_get_u16(NVS_CONFIG_FAN_SPEED, 100) / 100);
+    EMC2302_set_fan_speed(0, (float) nvs_config_get_u16(NVS_CONFIG_FAN_SPEED, 100) / 100);
+    EMC2302_set_fan_speed(1, (float) nvs_config_get_u16(NVS_CONFIG_FAN_SPEED, 100) / 100);
 
     vTaskDelay(500 / portTICK_PERIOD_MS);
 

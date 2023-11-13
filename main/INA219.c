@@ -48,7 +48,7 @@ float INA219_read_voltage(void)
     uint8_t data[2];
 
     ESP_ERROR_CHECK(register_read(INA219_REG_BUSVOLTAGE, data, 2));
-    ESP_LOGI(TAG, "Raw Voltage = %02X %02X", data[0], data[1]);
+    //ESP_LOGI(TAG, "Raw Voltage = %02X %02X", data[0], data[1]);
 	ESP_LOGI(TAG, "mVolts: %d", (((data[0] << 8) | data[1]) >> 3) * 4);
 
     return (uint16_t)(((data[0] << 8) | data[1]) >> 3) * 4;
@@ -59,7 +59,7 @@ float INA219_read_current(void)
     uint8_t data[2];
 
     ESP_ERROR_CHECK(register_read(INA219_REG_CURRENT, data, 2));
-    ESP_LOGI(TAG, "Raw Current = %02X %02X", data[0], data[1]);
+    //ESP_LOGI(TAG, "Raw Current = %02X %02X", data[0], data[1]);
     ESP_LOGI(TAG, "mAmps: %d", (int16_t)(data[0] << 8) | data[1]);
 
     return (int16_t)((data[0] << 8) | data[0]);
@@ -70,7 +70,7 @@ float INA219_read_power(void)
     uint8_t data[2];
 
     ESP_ERROR_CHECK(register_read(INA219_REG_POWER, data, 2));
-    ESP_LOGI(TAG, "Raw Power = %02X %02X", data[0], data[1]);
+    //ESP_LOGI(TAG, "Raw Power = %02X %02X", data[0], data[1]);
     ESP_LOGI(TAG, "mWatts: %d", ((data[0] << 8) | data[1]) * 20);
 
     return ((data[0] << 8) | data[1]) * 20;
