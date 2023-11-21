@@ -36,10 +36,10 @@ static float _fbound(float value, float lower_bound, float upper_bound)
 
 void POWER_MANAGEMENT_task(void * pvParameters)
 {
-
     GlobalState * GLOBAL_STATE = (GlobalState *) pvParameters;
-
     PowerManagementModule * power_management = &GLOBAL_STATE->POWER_MANAGEMENT_MODULE;
+
+    ESP_LOGI(TAG, "POWER MANAGEMENT TASK Started");
 
     power_management->frequency_multiplier = 1;
 

@@ -32,8 +32,8 @@
 #define RA 10000.0      // R9
 #define RB 1540.0       // R10
 #define NOMINAL 4.496   // this is with the current DAC set to 0. Should be pretty close to (VFB*(RA+RB))/RB
-#define MAXV 4.6        // still need to calculate these
-#define MINV 3.0
+#define MAXV 5.50
+#define MINV 3.48
 
 static const char *TAG = "DS4432U.c";
 
@@ -45,6 +45,7 @@ static uint8_t voltage_to_reg(float vout)
 {
     float change;
     uint8_t reg;
+    // vout specifies core voltage of ONE domain, but we have 3 domains in series
     float vout_actual = vout * 3.0;
 
     // make sure the requested voltage is in within range of MINV and MAXV

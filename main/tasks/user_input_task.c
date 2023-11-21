@@ -11,6 +11,7 @@ static bool button_being_pressed = false;
 
 void USER_INPUT_task(void *pvParameters)
 {
+    ESP_LOGI(TAG, "USER INPUT Task Started");
 
     gpio_set_direction(BUTTON_BOOT, GPIO_MODE_INPUT);
 

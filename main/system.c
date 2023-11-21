@@ -72,9 +72,7 @@ static void _init_system(GlobalState * global_state, SystemModule * module)
     // DS4432U DAC setup
 	uint16_t core_voltage = nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE);
     ESP_LOGI(TAG, "Setting VCORE to %d", core_voltage);
-    //DS4432U_set_vcore(core_voltage / 1000.0);
-    // hard coded value for testing
-    DS4432U_set_vcore(1200 / 1000.0);
+    DS4432U_set_vcore(core_voltage / 1000.0);
 
     // Enable core voltage now that DAC value has been set
     gpio_set_direction(GPIO_NUM_10, GPIO_MODE_OUTPUT);
@@ -355,6 +353,8 @@ void SYSTEM_task(void * pvParameters)
 {
     GlobalState * GLOBAL_STATE = (GlobalState *) pvParameters;
     SystemModule * module = &GLOBAL_STATE->SYSTEM_MODULE;
+
+    ESP_LOGI(TAG, "SYSTEM Task Started");
 
     _init_system(GLOBAL_STATE, module);
 
