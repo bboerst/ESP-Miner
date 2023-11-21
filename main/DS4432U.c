@@ -18,13 +18,22 @@
 #define DS4432U_OUT1_REG 0xF9    // register for current output 1
 
 // DS4432U Transfer function constants
+//#define VFB 0.6
+//#define IFS 0.000098921 // (Vrfs / Rfs) x (127/16)  -> Vrfs = 0.997, Rfs = 80000
+//#define RA 4750.0       // R14
+//#define RB 3320.0       // R15
+//#define NOMINAL 1.451   // this is with the current DAC set to 0. Should be pretty close to (VFB*(RA+RB))/RB
+//#define MAXV 2.39
+//#define MINV 0.046
+
+// DS4432U Transfer function constants HEX Board
 #define VFB 0.6
 #define IFS 0.000098921 // (Vrfs / Rfs) x (127/16)  -> Vrfs = 0.997, Rfs = 80000
-#define RA 4750.0       // R14
-#define RB 3320.0       // R15
-#define NOMINAL 1.451   // this is with the current DAC set to 0. Should be pretty close to (VFB*(RA+RB))/RB
-#define MAXV 2.39
-#define MINV 0.046
+#define RA 10000.0      // R9
+#define RB 1540.0       // R10
+#define NOMINAL 4.496   // this is with the current DAC set to 0. Should be pretty close to (VFB*(RA+RB))/RB
+#define MAXV 4.6        // still need to calculate these
+#define MINV 3.0
 
 static const char *TAG = "DS4432U.c";
 
@@ -36,19 +45,20 @@ static uint8_t voltage_to_reg(float vout)
 {
     float change;
     uint8_t reg;
+    float vout_actual = vout * 3.0;
 
     // make sure the requested voltage is in within range of MINV and MAXV
-    if (vout > MAXV || vout < MINV)
+    if (vout_actual > MAXV || vout_actual < MINV)
     {
         return 0;
     }
 
     // this is the transfer function. comes from the DS4432U+ datasheet
-    change = fabs((((VFB / RB) - ((vout - VFB) / RA)) / IFS) * 127);
+    change = fabs((((VFB / RB) - ((vout_actual - VFB) / RA)) / IFS) * 127);
     reg = (uint8_t)ceil(change);
 
     // Set the MSB high if the requested voltage is BELOW nominal
-    if (vout < NOMINAL)
+    if (vout_actual < NOMINAL)
     {
         reg |= 0x80;
     }
@@ -127,7 +137,7 @@ bool DS4432U_set_vcore(float core_voltage)
 
     reg_setting = voltage_to_reg(core_voltage);
 
-    ESP_LOGI(TAG, "Set BM1397 voltage = %.3fV [0x%02X]", core_voltage, reg_setting);
+    ESP_LOGI(TAG, "Set ASIC Core voltage = %.3fV [0x%02X]", core_voltage, reg_setting);
 
     DS4432U_set(reg_setting); /// eek!
 
