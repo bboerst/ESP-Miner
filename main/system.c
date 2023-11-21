@@ -64,8 +64,8 @@ static void _init_system(GlobalState * global_state, SystemModule * module)
     //  led_set();
 
     // Playing with BI level
-    gpio_set_direction(GPIO_NUM_10, GPIO_MODE_OUTPUT);
-    gpio_set_level(GPIO_NUM_10, 0);
+    //gpio_set_direction(GPIO_NUM_10, GPIO_MODE_OUTPUT);
+    //gpio_set_level(GPIO_NUM_10, 0);
 
     // Init I2C
     ESP_ERROR_CHECK(i2c_master_init());
@@ -75,24 +75,24 @@ static void _init_system(GlobalState * global_state, SystemModule * module)
 
     // DS4432U tests
     //DS4432U_set_vcore(nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE, CONFIG_ASIC_VOLTAGE) / 1000.0);
+    // hard coded value for testing
     DS4432U_set_vcore(1000 / 1000.0);
 
     // Fan Tests
     EMC2302_init(nvs_config_get_u16(NVS_CONFIG_INVERT_FAN_POLARITY, 1));
-
     EMC2302_set_fan_speed(0, (float) nvs_config_get_u16(NVS_CONFIG_FAN_SPEED, 100) / 100);
     EMC2302_set_fan_speed(1, (float) nvs_config_get_u16(NVS_CONFIG_FAN_SPEED, 100) / 100);
 
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
     // oled
-//    if (!OLED_init()) {
+    if (!OLED_init()) {
         ESP_LOGI(TAG, "OLED init failed!");
-//    } else {
-//        ESP_LOGI(TAG, "OLED init success!");
+    } else {
+        ESP_LOGI(TAG, "OLED init success!");
         // clear the oled screen
-//        OLED_fill(0);
-//    }
+        OLED_fill(0);
+    }
 
     netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
 }
