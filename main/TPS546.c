@@ -61,6 +61,16 @@ static esp_err_t smb_read_byte(uint8_t command, uint8_t *data)
 }
 
 /**
+ * @brief Read a single STATUS register byte
+ */
+static uint8_t read_status_byte(uint8_t pmbus_addr, uint8_t cmd_code)
+{
+    uint8_t status_byte;
+    smb_read_byte(cmd_code, &status_byte);
+    return status_byte;
+}
+
+/**
  * @brief SMBus write byte
  */
 static esp_err_t smb_write_byte(uint8_t command, uint8_t data)
@@ -76,7 +86,8 @@ static esp_err_t smb_write_byte(uint8_t command, uint8_t data)
     ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, SMBUS_DEFAULT_TIMEOUT));
     i2c_cmd_link_delete(cmd);
 
-    // TODO return an actual error status
+    // return error status
+    TPS546_check_fault_codes();
     return err;
 }
 
@@ -102,7 +113,8 @@ static esp_err_t smb_read_word(uint8_t command, uint16_t *result)
     i2c_cmd_link_delete(cmd);
 
     *result = (data[1] << 8) + data[0];
-    // TODO return an actual error status
+    // return error status
+    TPS546_check_fault_codes();
     return err;
 }
 
@@ -123,7 +135,8 @@ static esp_err_t smb_write_word(uint8_t command, uint16_t data)
     ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, SMBUS_DEFAULT_TIMEOUT));
     i2c_cmd_link_delete(cmd);
 
-    // TODO return an actual error status
+    // return error status
+    TPS546_check_fault_codes();
     return err;
 }
 
@@ -153,7 +166,8 @@ static esp_err_t smb_read_block(uint8_t command, uint8_t *data, uint8_t len)
     ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, SMBUS_DEFAULT_TIMEOUT));
     i2c_cmd_link_delete(cmd);
 
-    // TODO return an actual error status
+    // return error status
+    TPS546_check_fault_codes();
     return 0;
 }
 
@@ -176,7 +190,8 @@ static esp_err_t smb_write_block(uint8_t command, uint8_t *data, uint8_t len)
     ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, SMBUS_DEFAULT_TIMEOUT));
     i2c_cmd_link_delete(cmd);
 
-    // TODO return an actual error status
+    // return error status
+    TPS546_check_fault_codes();
     return 0;
 }
 
@@ -470,7 +485,7 @@ void TPS546_read_mfr_info(uint8_t *read_mfr_revision)
     ESP_LOGI(TAG, "MFR_ID: %s", read_mfr_id);
     ESP_LOGI(TAG, "MFR_MODEL: %s", read_mfr_model);
     ESP_LOGI(TAG, "MFR_REVISION: %d%d%d ", read_mfr_revision[0], 
-        read_mfr_revision[1], read_mfr_revision[2]);
+    read_mfr_revision[1], read_mfr_revision[2]);
 }
 
 /* Write the manufacturer ID and revision to NVM */
@@ -571,6 +586,96 @@ void TPS546_write_entire_config(void)
     ESP_LOGI(TAG, "---Saving new config---");
     smb_write_byte(PMBUS_STORE_USER_ALL, 0x98);
 
+}
+
+/* Check fault codes in STATUS registers */
+void TPS546_check_fault_codes(void)
+{
+    ESP_LOGI(TAG, "Checking fault codes...");
+
+    uint8_t status_word = read_status_byte(TPS546_I2CADDR, PMBUS_STATUS_WORD);
+    uint8_t status_vout = read_status_byte(TPS546_I2CADDR, PMBUS_STATUS_VOUT);
+    uint8_t status_iout = read_status_byte(TPS546_I2CADDR, PMBUS_STATUS_IOUT);
+    uint8_t status_input = read_status_byte(TPS546_I2CADDR, PMBUS_STATUS_INPUT);
+    uint8_t status_temperature = read_status_byte(TPS546_I2CADDR, PMBUS_STATUS_TEMPERATURE);
+    uint8_t status_cml = read_status_byte(TPS546_I2CADDR, PMBUS_STATUS_CML);
+    uint8_t status_mfr_specific = read_status_byte(TPS546_I2CADDR, PMBUS_STATUS_MFR_SPECIFIC);
+
+    // Check STATUS_WORD register
+    if (status_word & PMBUS_STATUS_WORD_VOUT_OV_FAULT)
+        ESP_LOGI(TAG, "VOUT Over Voltage Fault: %02x", status_word);
+    if (status_word & PMBUS_STATUS_WORD_IOUT_OC_FAULT)
+        ESP_LOGI(TAG, "IOUT Over Current Fault: %02x", status_word);
+    if (status_word & (1 << 5))
+        ESP_LOGI(TAG, "VOUT UV Fault: %02x", status_word);
+    if (status_word & (1 << 4))
+        ESP_LOGI(TAG, "IOUT Over Current LV Fault: %02x", status_word);
+    if (status_word & (1 << 3))
+        ESP_LOGI(TAG, "External Temp Fault: %02x", status_word);
+    if (status_word & (1 << 2))
+        ESP_LOGI(TAG, "CML Fault: %02x", status_word);
+    if (status_word & (1 << 1))
+        ESP_LOGI(TAG, "TOFF Max Fault: %02x", status_word);
+    if (status_word & (1 << 0))
+        ESP_LOGI(TAG, "VIN UV Fault: %02x", status_word);
+
+    // Check STATUS_VOUT register
+    if (status_vout & (1 << 7))
+        ESP_LOGI(TAG, "VOUT OV Fault: %02x", status_vout);
+    if (status_vout & (1 << 6))
+        ESP_LOGI(TAG, "VOUT OV Warning: %02x", status_vout);
+    if (status_vout & (1 << 5))
+        ESP_LOGI(TAG, "VOUT UV Warning: %02x", status_vout);
+    if (status_vout & (1 << 4))
+        ESP_LOGI(TAG, "VOUT UV Fault: %02x", status_vout);
+    if (status_vout & (1 << 3))
+        ESP_LOGI(TAG, "VOUT Max Warning: %02x", status_vout);
+
+    // Check STATUS_IOUT register
+    if (status_iout & (1 << 7))
+        ESP_LOGI(TAG, "IOUT OC Fault: %02x", status_iout);
+    if (status_iout & (1 << 6))
+        ESP_LOGI(TAG, "IOUT OC Warning: %02x", status_iout);
+
+    // Check STATUS_INPUT register
+    if (status_input & (1 << 7))
+        ESP_LOGI(TAG, "VIN OV Fault: %02x", status_input);
+    if (status_input & (1 << 6))
+        ESP_LOGI(TAG, "VIN OV Warning: %02x", status_input);
+    if (status_input & (1 << 5))
+        ESP_LOGI(TAG, "VIN UV Warning: %02x", status_input);
+    if (status_input & (1 << 4))
+        ESP_LOGI(TAG, "VIN UV Fault: %02x", status_input);
+
+    // Check STATUS_TEMPERATURE register
+    if (status_temperature & (1 << 7))
+        ESP_LOGI(TAG, "OT Fault: %02x", status_temperature);
+    if (status_temperature & (1 << 6))
+        ESP_LOGI(TAG, "OT Warning: %02x", status_temperature);
+
+    // Check STATUS_CML register
+    if (status_cml & (1 << 7))
+        ESP_LOGI(TAG, "CML Fault");
+    if (status_cml & (1 << 6))
+        ESP_LOGI(TAG, "CML Warning");
+
+    // Check STATUS_MFR_SPECIFIC register
+    if (status_mfr_specific & (1 << 7))
+        ESP_LOGI(TAG, "Manufacturer-Specific Fault 7: %02x", status_mfr_specific);
+    if (status_mfr_specific & (1 << 6))
+        ESP_LOGI(TAG, "Manufacturer-Specific Fault 6: %02x", status_mfr_specific);
+    if (status_mfr_specific & (1 << 5))
+        ESP_LOGI(TAG, "Manufacturer-Specific Fault 5: %02x", status_mfr_specific);
+    if (status_mfr_specific & (1 << 4))
+        ESP_LOGI(TAG, "Manufacturer-Specific Fault 4: %02x", status_mfr_specific);
+    if (status_mfr_specific & (1 << 3))
+        ESP_LOGI(TAG, "Manufacturer-Specific Fault 3: %02x", status_mfr_specific);
+    if (status_mfr_specific & (1 << 2))
+        ESP_LOGI(TAG, "Manufacturer-Specific Fault 2: %02x", status_mfr_specific);
+    if (status_mfr_specific & (1 << 1))
+        ESP_LOGI(TAG, "Manufacturer-Specific Fault 1: %02x", status_mfr_specific);
+    if (status_mfr_specific & (1 << 0))
+        ESP_LOGI(TAG, "Manufacturer-Specific Fault 0: %02x", status_mfr_specific);
 }
 
 int TPS546_get_frequency(void)

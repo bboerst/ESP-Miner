@@ -68,6 +68,10 @@
 #define PMBUS_COMPENSATION_CONFIG 0xB1
 #define PMBUS_POWER_STAGE_CONFIG 0xB5
 
+// STATUS_WORD bit definitions
+#define PMBUS_STATUS_WORD_VOUT_OV_FAULT  (1 << 7)
+#define PMBUS_STATUS_WORD_IOUT_OC_FAULT  (1 << 6)
+
 /* Manufacturer Specific PMBUS commands used by the TPS546D24A */
 #define PMBUS_TELEMETRY_CFG 0xD0
 #define PMBUS_READ_ALL 0xDA

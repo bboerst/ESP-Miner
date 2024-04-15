@@ -72,6 +72,7 @@ int TPS546_init(void);
 void TPS546_read_mfr_info(uint8_t *);
 void TPS546_set_mfr_info(void);
 void TPS546_write_entire_config(void);
+void TPS546_check_fault_codes(void);
 int TPS546_get_frequency(void);
 void TPS546_set_frequency(int);
 int TPS546_get_temperature(void);
