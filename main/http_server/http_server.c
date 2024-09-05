@@ -312,6 +312,9 @@ static esp_err_t PATCH_update_settings(httpd_req_t * req)
     if ((item = cJSON_GetObjectItem(root, "fanspeed")) != NULL) {
         nvs_config_set_u16(NVS_CONFIG_FAN_SPEED, item->valueint);
     }
+    if ((item = cJSON_GetObjectItem(root, "geoHashingMode")) != NULL) {
+        nvs_config_set_u16(NVS_CONFIG_GEO_HASHING_MODE, item->valueint);
+    }
 
     cJSON_Delete(root);
     httpd_resp_send_chunk(req, NULL, 0);
@@ -428,6 +431,8 @@ static esp_err_t GET_system_info(httpd_req_t * req)
 
     cJSON_AddNumberToObject(root, "fanspeed", GLOBAL_STATE->POWER_MANAGEMENT_MODULE.fan_perc);
     cJSON_AddNumberToObject(root, "fanrpm", GLOBAL_STATE->POWER_MANAGEMENT_MODULE.fan_rpm);
+
+    cJSON_AddNumberToObject(root, "geoHashingMode", nvs_config_get_u16(NVS_CONFIG_GEO_HASHING_MODE, 0));
 
     free(ssid);
     free(hostname);

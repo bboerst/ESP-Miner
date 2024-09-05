@@ -242,6 +242,18 @@ void STRATUM_V1_parse(StratumApiV1Message * message, const char * stratum_json)
         new_work->target = strtoul(cJSON_GetArrayItem(params, 6)->valuestring, NULL, 16);
         new_work->ntime = strtoul(cJSON_GetArrayItem(params, 7)->valuestring, NULL, 16);
 
+        // Extract block height from coinbase_1
+        char *height_start = strstr(new_work->coinbase_1, "/");
+        if (height_start) {
+            height_start += 1;
+            char *height_end = strchr(height_start, '/');
+            if (height_end) {
+                *height_end = '\0';
+                new_work->block_height = strtoul(height_start, NULL, 16);
+                *height_end = '/';
+            }
+        }
+
         message->mining_notification = new_work;
 
         // params can be varible length
@@ -342,7 +354,7 @@ int STRATUM_V1_authenticate(int socket, const char * username, const char * pass
 }
 
 /// @param socket Socket to write to
-/// @param username The client’s user name.
+/// @param username The client's user name.
 /// @param jobid The job ID for the work being submitted.
 /// @param ntime The hex-encoded time value use in the block header.
 /// @param extranonce_2 The hex-encoded value of extra nonce 2.

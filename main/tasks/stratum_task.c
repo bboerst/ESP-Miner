@@ -196,6 +196,17 @@ void stratum_task(void * pvParameters)
 
                     stratum_api_v1_message.mining_notification->difficulty = SYSTEM_TASK_MODULE.stratum_difficulty;
                     queue_enqueue(&GLOBAL_STATE->stratum_queue, stratum_api_v1_message.mining_notification);
+
+                    GLOBAL_STATE->current_block_height = stratum_api_v1_message.mining_notification->block_height;
+
+                    // Notify frontend of new block
+                    cJSON *new_block_json = cJSON_CreateObject();
+                    cJSON_AddStringToObject(new_block_json, "event", "new_block");
+                    cJSON_AddNumberToObject(new_block_json, "height", GLOBAL_STATE->current_block_height);
+                    char *new_block_str = cJSON_Print(new_block_json);
+                    websocket_broadcast(new_block_str, strlen(new_block_str));
+                    free(new_block_str);
+                    cJSON_Delete(new_block_json);
                 } else if (stratum_api_v1_message.method == MINING_SET_DIFFICULTY) {
                     if (stratum_api_v1_message.new_difficulty != SYSTEM_TASK_MODULE.stratum_difficulty) {
                         SYSTEM_TASK_MODULE.stratum_difficulty = stratum_api_v1_message.new_difficulty;

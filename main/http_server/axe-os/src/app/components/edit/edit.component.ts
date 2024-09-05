@@ -117,6 +117,9 @@ export class EditComponent implements OnInit {
     { name: '1300', value: 1300 },
   ];
 
+  // Add this property to the EditComponent class
+  canUpdateStratumUser: boolean = true;
+
   constructor(
     private fb: FormBuilder,
     private systemService: SystemService,
@@ -158,7 +161,8 @@ export class EditComponent implements OnInit {
           autofanspeed: [info.autofanspeed == 1, [Validators.required]],
           invertfanpolarity: [info.invertfanpolarity == 1, [Validators.required]],
           fanspeed: [info.fanspeed, [Validators.required]],
-          overheat_mode: [info.overheat_mode, [Validators.required]]
+          overheat_mode: [info.overheat_mode, [Validators.required]],
+          geoHashingMode: [info.geoHashingMode == 1, [Validators.required]]
         });
 
         this.form.controls['autofanspeed'].valueChanges.pipe(
@@ -171,6 +175,12 @@ export class EditComponent implements OnInit {
           }
         });
       });
+
+    this.websocketService.messages$.subscribe((message: any) => {
+      if (message.event === 'new_block') {
+        this.canUpdateStratumUser = true;
+      }
+    });
   }
 
 
@@ -184,6 +194,15 @@ export class EditComponent implements OnInit {
       this.devToolsOpen = false;
     }
   };
+
+  // Modify the onSubmit method to check if the Stratum User can be updated
+  onSubmit() {
+    if (this.form.get('stratumUser').dirty && !this.canUpdateStratumUser) {
+      alert('Stratum User cannot be updated until the next block is found.');
+      return;
+    }
+    // ... rest of the onSubmit method
+  }
 
   public updateSystem() {
 

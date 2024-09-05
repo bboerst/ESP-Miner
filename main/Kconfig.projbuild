@@ -49,3 +49,10 @@ menu "Stratum Configuration"
             A starting difficulty to use with the pool.
 
 endmenu
+
+config GEO_HASHING_MODE
+    int "GeoHashing Mode"
+    range 0 1
+    default 0
+    help
+        Enable or disable GeoHashing Mode. 0 for disabled, 1 for enabled.

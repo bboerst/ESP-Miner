@@ -40,7 +40,7 @@
         <div class="field grid p-fluid">
             <label htmlFor="stratumUser" class="col-12 mb-2 md:col-2 md:mb-0">Stratum User:</label>
             <div class="col-12 md:col-10">
-                <input pInputText id="stratumUser" formControlName="stratumUser" type="text" />
+                <input pInputText id="stratumUser" formControlName="stratumUser" type="text" [disabled]="!canUpdateStratumUser" />
             </div>
         </div>
         <div class="field grid p-fluid">
@@ -184,6 +184,14 @@
                 <p-checkbox name="overheat_mode" formControlName="overheat_mode" inputId="overheat_mode"
                     [binary]="true"></p-checkbox>
                 <label for="overheat_mode">Disable Overheat Mode. Make sure to reset Frequency and Voltage</label>
+            </div>
+        </div>
+
+        <div class="col-12 md:col-4">
+            <div class="field-checkbox">
+                <p-checkbox name="geoHashingMode" formControlName="geoHashingMode" inputId="geoHashingMode"
+                    [binary]="true"></p-checkbox>
+                <label for="geoHashingMode">GeoHashing Mode</label>
             </div>
         </div>
 

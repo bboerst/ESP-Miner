@@ -39,6 +39,7 @@ typedef struct
     uint32_t target;
     uint32_t ntime;
     uint32_t difficulty;
+    uint32_t block_height;
 } mining_notify;
 
 typedef struct

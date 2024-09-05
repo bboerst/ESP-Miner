@@ -107,6 +107,9 @@ typedef struct
 
     int sock;
 
+    uint32_t current_block_height;
+
+    uint32_t geo_hashing_mode;
 } GlobalState;
 
 #endif /* GLOBAL_STATE_H_ */
